@@ -71,10 +71,11 @@ public class MainActivity extends AppCompatActivity {
         data = (TextView) findViewById(R.id.result);
         if(savedInstanceState != null){
             data.setText(savedInstanceState.get("DATA").toString());
-            num1 = (String) savedInstanceState.get(num1);
-            num2 = (String) savedInstanceState.get(num2);
-            op = (String) savedInstanceState.get(op);
-            equalsClicked = (boolean) savedInstanceState.get("equalsClicked");
+            num1 = savedInstanceState.getString("StringOne");
+            num2 = savedInstanceState.getString("StringTwo");
+            op = savedInstanceState.getString("Operation");
+            equalsClicked = savedInstanceState.getBoolean("equalsClicked");
+            equals = (BigDecimal) savedInstanceState.getSerializable("EQUALS");
         }
 
         //String b = "2";
@@ -173,69 +174,67 @@ public class MainActivity extends AppCompatActivity {
                             equalsClicked=false;
                         break;
                     case R.id.button_res:
-                        switch (op) {
-                            case "+":
-                                if(equalsClicked){
-                                    BigDecimal tmp = new BigDecimal(data.getText().toString());
-                                    tmp = tmp.add(new BigDecimal(num2));
-                                    data.setText(tmp.toString());
-                                }
-                                else {
-                                    equals = equals.add(new BigDecimal(num1));
-                                    num2 = data.getText().toString();
-                                    equals = equals.add(new BigDecimal(num2));
-                                    data.setText(equals.toString());
-                                    equals = new BigDecimal("0");
-                                    equalsClicked = true;
-                                }
-                                break;
-                            case "-":
-                                if(equalsClicked){
-                                    BigDecimal tmp = new BigDecimal(data.getText().toString());
-                                    tmp = tmp.subtract(new BigDecimal(num2));
-                                    data.setText(tmp.toString());
-                                }
-                                else {
-                                    equals = equals.add(new BigDecimal(num1));
-                                    num2 = data.getText().toString();
-                                    equals = equals.subtract(new BigDecimal(num2));
-                                    data.setText(equals.toString());
-                                    equals = new BigDecimal("0");
-                                    equalsClicked = true;
-                                }
+                        if(op != null) {
+                            switch (op) {
+                                case "+":
+                                    if (equalsClicked) {
+                                        BigDecimal tmp = new BigDecimal(data.getText().toString());
+                                        tmp = tmp.add(new BigDecimal(num2));
+                                        data.setText(tmp.toString());
+                                    } else {
+                                        equals = equals.add(new BigDecimal(num1));
+                                        num2 = data.getText().toString();
+                                        equals = equals.add(new BigDecimal(num2));
+                                        data.setText(equals.toString());
+                                        equals = new BigDecimal("0");
+                                        equalsClicked = true;
+                                    }
+                                    break;
+                                case "-":
+                                    if (equalsClicked) {
+                                        BigDecimal tmp = new BigDecimal(data.getText().toString());
+                                        tmp = tmp.subtract(new BigDecimal(num2));
+                                        data.setText(tmp.toString());
+                                    } else {
+                                        equals = equals.add(new BigDecimal(num1));
+                                        num2 = data.getText().toString();
+                                        equals = equals.subtract(new BigDecimal(num2));
+                                        data.setText(equals.toString());
+                                        equals = new BigDecimal("0");
+                                        equalsClicked = true;
+                                    }
 
-                                break;
-                            case "*":
-                                if(equalsClicked){
-                                    BigDecimal tmp = new BigDecimal(data.getText().toString());
-                                    tmp = tmp.multiply(new BigDecimal(num2));
-                                    data.setText(tmp.toString());
-                                }
-                                else {
-                                    equals = equals.add(new BigDecimal(num1));
-                                    num2 = data.getText().toString();
-                                    equals = equals.multiply(new BigDecimal(num2));
-                                    data.setText(equals.toString());
-                                    equals = new BigDecimal("0");
-                                    equalsClicked = true;
-                                }
+                                    break;
+                                case "*":
+                                    if (equalsClicked) {
+                                        BigDecimal tmp = new BigDecimal(data.getText().toString());
+                                        tmp = tmp.multiply(new BigDecimal(num2));
+                                        data.setText(tmp.toString());
+                                    } else {
+                                        equals = equals.add(new BigDecimal(num1));
+                                        num2 = data.getText().toString();
+                                        equals = equals.multiply(new BigDecimal(num2));
+                                        data.setText(equals.toString());
+                                        equals = new BigDecimal("0");
+                                        equalsClicked = true;
+                                    }
 
-                                break;
-                            case "/":
-                                if(equalsClicked){
-                                    BigDecimal tmp = new BigDecimal(data.getText().toString());
-                                    tmp = tmp.divide(new BigDecimal(num2),5);
-                                    data.setText(tmp.toString());
-                                }
-                                else {
-                                    equals = equals.add(new BigDecimal(num1));
-                                    num2 = data.getText().toString();
-                                    equals = equals.divide(new BigDecimal(num2), 5);
-                                    data.setText(equals.toString());
-                                    equals = new BigDecimal("0");
-                                    equalsClicked = true;
-                                }
-                                break;
+                                    break;
+                                case "/":
+                                    if (equalsClicked) {
+                                        BigDecimal tmp = new BigDecimal(data.getText().toString());
+                                        tmp = tmp.divide(new BigDecimal(num2), 5);
+                                        data.setText(tmp.toString());
+                                    } else {
+                                        equals = equals.add(new BigDecimal(num1));
+                                        num2 = data.getText().toString();
+                                        equals = equals.divide(new BigDecimal(num2), 5);
+                                        data.setText(equals.toString());
+                                        equals = new BigDecimal("0");
+                                        equalsClicked = true;
+                                    }
+                                    break;
+                            }
                         }
                         break;
 
@@ -275,8 +274,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String tmp = data.getText().toString();
-                tmp = tmp.substring(0,tmp.length()-1);
-                data.setText(tmp);
+                if(tmp.length() >=1 && !tmp.isEmpty()) {
+                    tmp = tmp.substring(0, tmp.length() - 1);
+                    data.setText(tmp);
+                }
+                else{
+                    data.setText("");
+                }
             }
         });
 
@@ -296,11 +300,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putString(num1,num1);
-        outState.putString(num2,num2);
-        outState.putString(op,op);
+        outState.putString("StringOne",num1);
+        outState.putString("StringTwo",num2);
+        outState.putString("Operation",op);
         outState.putString("DATA",data.getText().toString());
         outState.putBoolean("equalsClicked",equalsClicked);
+        outState.putSerializable("EQUALS",equals);
         super.onSaveInstanceState(outState);
     }
 
